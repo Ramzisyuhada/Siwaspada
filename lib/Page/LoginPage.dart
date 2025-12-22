@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:siwaspada/Page/DaftarPage.dart';
+import 'package:siwaspada/Page/HomePage.dart';
 import 'package:siwaspada/Widget/ButtonCustom.dart';
 import 'package:siwaspada/Widget/CostumInputField.dart';
 
@@ -109,11 +110,11 @@ class _LoginPageState extends State<LoginPage> {
                       debugPrint("Password: $password");
                       debugPrint("Destinasi: $destinasi");
 
-                      // TODO:
-                      // Navigator.pushReplacement(
-                      //   context,
-                      //   MaterialPageRoute(builder: (_) => const HomePage()),
-                      // );
+                      
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const Homepage()),
+                      );
                     }
                   },
                   ValueRadius: 10,
