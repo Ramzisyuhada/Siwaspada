@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class Buttoncustom extends StatefulWidget {
   final String textButton;
   final Color datacolor;
-  final VoidCallback onPressed; // 👈 CALLBACK
+final Future<void> Function()? onPressed;
   final double ValueRadius;
   final Color dataColorText;
   const Buttoncustom({
