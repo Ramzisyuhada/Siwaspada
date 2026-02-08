@@ -5,7 +5,12 @@ import 'package:siwaspada/Model/CuacaModel.dart';
 import 'package:siwaspada/Service/bmkg_weather_service.dart';
 
 class CuacaPage extends StatefulWidget {
-  const CuacaPage({super.key});
+  final int idTour;
+
+  const CuacaPage({
+    super.key,
+    required this.idTour,
+  });
 
   @override
   State<CuacaPage> createState() => _CuacaPageState();
@@ -13,14 +18,40 @@ class CuacaPage extends StatefulWidget {
 
 class _CuacaPageState extends State<CuacaPage> {
   late Future<List<CuacaModel>> futureCuaca;
+  late String adm4;
+  late String lokasiText;
 
-  final String adm4 = "51.71.01.1001";
-  final String lokasiText = "Serangan, Denpasar Selatan";
+  /// ================= MAP DESTINASI -> BMKG =================
+  final Map<int, Map<String, String>> cuacaMap = {
+    1: {
+      "adm4": "51.71.01.1001",
+      "lokasi": "Pantai Kute, Lombok",
+    },
+    2: {
+      "adm4": "51.71.01.2002",
+      "lokasi": "Sirkuit Mandalika",
+    },
+    3: {
+      "adm4": "51.71.01.3003",
+      "lokasi": "Bukit Merese",
+    },
+  };
 
   @override
   void initState() {
     super.initState();
-    futureCuaca = BmkgWeatherService.fetchCuaca(adm4);
+
+    final data = cuacaMap[widget.idTour];
+
+    if (data == null) {
+      adm4 = "";
+      lokasiText = "Lokasi tidak diketahui";
+      futureCuaca = Future.value([]);
+    } else {
+      adm4 = data["adm4"]!;
+      lokasiText = data["lokasi"]!;
+      futureCuaca = BmkgWeatherService.fetchCuaca(adm4);
+    }
   }
 
   Future<void> _refresh() async {

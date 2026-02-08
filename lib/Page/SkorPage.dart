@@ -18,13 +18,42 @@ class SkorPage extends StatefulWidget {
 
 class _SkorPageState extends State<SkorPage> {
   late Future<List<dynamic>> futureRatings;
+  Map<String, dynamic>? myRating;
 
-  Map<String, dynamic>? myRating; // rating user login
+  late List<String> images;
+
+  /// ================= MAP DESTINASI -> GAMBAR =================
+  final Map<int, List<String>> gambarDestinasiMap = {
+    1: [ // Pantai Kute
+      "Image/pantaikuta1.jpeg",
+      "Image/pantaikuta2.jpg",
+      "Image/pantaikuta3.jpg",
+    ],
+    2: [ // Sirkuit Mandalika
+      "Image/sirkuitmandalika1.jpg",
+      "Image/sirkuitmandalika2.jpg",
+      "Image/sirkuitmandalika3.jpg",
+    ],
+    3: [ // Bukit Merese
+      "Image/bukitmerese1.jpg",
+      "Image/bukitmerese2.jpg",
+      "Image/bukitmerese3.jpg",
+    ],
+  };
 
   @override
   void initState() {
     super.initState();
+
     futureRatings = RatingService.getByTour(widget.idTour);
+
+    /// SET GAMBAR SESUAI DESTINASI
+    images = gambarDestinasiMap[widget.idTour] ??
+        [
+          "Image/default1.jpg",
+          "Image/default2.jpg",
+          "Image/default3.jpg",
+        ];
   }
 
   /// ================= RATA-RATA =================
@@ -33,7 +62,7 @@ class _SkorPageState extends State<SkorPage> {
 
     final total = ratings.fold<int>(
       0,
-      (sum, r) => sum + (r['value'] as int),
+      (sum, r) => sum + int.parse(r['value'].toString()),
     );
 
     return total / ratings.length;
@@ -43,16 +72,15 @@ class _SkorPageState extends State<SkorPage> {
   double percentStar(List ratings, int star) {
     if (ratings.isEmpty) return 0;
 
-    final count =
-        ratings.where((r) => (r['value'] as int) == star).length;
+    final count = ratings.where(
+      (r) => int.parse(r['value'].toString()) == star,
+    ).length;
 
     return count / ratings.length;
   }
 
   @override
   Widget build(BuildContext context) {
-    final images = ["Image/bukit1.jpg", "Image/bukit2.jpg"];
-
     return Scaffold(
       backgroundColor: const Color(0xffFFF6F4),
       appBar: AppBar(
@@ -78,8 +106,6 @@ class _SkorPageState extends State<SkorPage> {
           }
 
           final ratings = snapshot.data ?? [];
-
-          /// ===== SIMPAN RATING USER LOGIN (jika ada) =====
           myRating = ratings.isNotEmpty ? ratings.first : null;
 
           final avg = averageRating(ratings);
@@ -88,12 +114,19 @@ class _SkorPageState extends State<SkorPage> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                /// ================= IMAGE =================
+
+                /// ================= IMAGE / CAROUSEL =================
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: CarouselSlider(
                     items: images
-                        .map((img) => Image.asset(img, fit: BoxFit.cover))
+                        .map(
+                          (img) => Image.asset(
+                            img,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          ),
+                        )
                         .toList(),
                     options: CarouselOptions(
                       height: 170,
@@ -162,9 +195,9 @@ class _SkorPageState extends State<SkorPage> {
                 /// ================= LIST COMMENT =================
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
+                  child: const Text(
                     "Ulasan",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -195,10 +228,12 @@ class _SkorPageState extends State<SkorPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            rating['users']['username'] ?? 'Anonim',
+            rating['users']?['username'] ?? 'Anonim',
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          StarRow(rating: rating['value']),
+          StarRow(
+            rating: int.parse(rating['value'].toString()),
+          ),
           if (rating['comment'] != null && rating['comment'] != "")
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -212,7 +247,10 @@ class _SkorPageState extends State<SkorPage> {
   /// ================= BOTTOM SHEET =================
   void showUlasanBottomSheet(
       BuildContext context, Map<String, dynamic>? existing) {
-    int rating = existing?['value'] ?? 3;
+    int rating = existing != null
+        ? int.parse(existing['value'].toString())
+        : 3;
+
     final commentCtrl =
         TextEditingController(text: existing?['comment'] ?? '');
 
@@ -232,9 +270,13 @@ class _SkorPageState extends State<SkorPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(widget.namaTour,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    widget.namaTour,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
 
                   const SizedBox(height: 12),
 
@@ -256,8 +298,9 @@ class _SkorPageState extends State<SkorPage> {
 
                   TextField(
                     controller: commentCtrl,
-                    decoration:
-                        const InputDecoration(hintText: "Tulis komentar"),
+                    decoration: const InputDecoration(
+                      hintText: "Tulis komentar",
+                    ),
                   ),
 
                   const SizedBox(height: 16),
@@ -310,7 +353,11 @@ class RatingBarRow extends StatelessWidget {
   final int star;
   final double value;
 
-  const RatingBarRow({super.key, required this.star, required this.value});
+  const RatingBarRow({
+    super.key,
+    required this.star,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {

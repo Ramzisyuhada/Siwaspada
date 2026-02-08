@@ -31,36 +31,45 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   int _currentIndex = 0;
 
-  final List<String> dataGambar = [
-    "Image/bukit1.jpg",
-    "Image/bukit2.jpg",
-    "Image/bukit3.jpg",
-  ];
-
+  late List<String> dataGambar;
   late Future<List<dynamic>> futureAduan;
+
+  /// ================= MAP DESTINASI -> GAMBAR =================
+  final Map<int, List<String>> gambarDestinasiMap = {
+    1: [ // Pantai Kute
+      "Image/pantaikuta1.jpeg",
+      "Image/pantaikuta2.jpg",
+      "Image/pantaikuta3.jpg",
+    ],
+    2: [ // Sirkuit Mandalika
+      "Image/sirkuitmanadalika1.jpg",
+      "Image/sirkuitmanadalika1.jpg",
+      "Image/sirkuitmanadalika1.jpg",
+    ],
+    3: [ // Bukit Merese
+      "Image/bukitmerese1.jpg",
+      "Image/bukitmerese1.jpg",
+      "Image/bukitmerese1.jpg",
+    ],
+  };
 
   @override
   void initState() {
     super.initState();
+
+    /// SET GAMBAR SESUAI DESTINASI
+    dataGambar = gambarDestinasiMap[widget.idTour] ??
+        [
+          "Image/default1.jpg",
+          "Image/default2.jpg",
+          "Image/default3.jpg",
+        ];
+
     _loadAduan();
   }
 
   void _loadAduan() {
     futureAduan = ComplaintService.getAllComplaints();
-  }
-
-  /// ================= FIX URL MEDIA =================
-  String buildMediaUrl(String path) {
-    if (path.startsWith('http')) {
-      if (!path.contains(':8000')) {
-        return path.replaceFirst(
-          'http://192.168.1.46',
-          'http://192.168.1.46:8000',
-        );
-      }
-      return path;
-    }
-    return 'http://192.168.1.46:8000$path';
   }
 
   bool _isImage(String url) {
@@ -90,14 +99,13 @@ class _HomepageState extends State<Homepage> {
 
       /// ================= BODY =================
       body: RefreshIndicator(
-        onRefresh: () async {
-          setState(() => _loadAduan());
-        },
+        onRefresh: () async => _loadAduan(),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               /// ================= CAROUSEL =================
               SizedBox(
                 height: 230,
@@ -129,6 +137,7 @@ class _HomepageState extends State<Homepage> {
                   mainAxisSpacing: 16,
                   childAspectRatio: 1.1,
                   children: [
+
                     MenuCard(
                       imagePath: "Image/achievement.png",
                       title: "Score",
@@ -144,6 +153,7 @@ class _HomepageState extends State<Homepage> {
                         );
                       },
                     ),
+
                     MenuCard(
                       imagePath: "Image/guidebook.png",
                       title: "EcoTourism Guide",
@@ -156,6 +166,7 @@ class _HomepageState extends State<Homepage> {
                         );
                       },
                     ),
+
                     MenuCard(
                       imagePath: "Image/cloudy.png",
                       title: "Cuaca",
@@ -163,11 +174,14 @@ class _HomepageState extends State<Homepage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const CuacaPage(),
+                            builder: (_) => CuacaPage(
+                              idTour: widget.idTour,
+                            ),
                           ),
                         );
                       },
                     ),
+
                     MenuCard(
                       imagePath: "Image/zone.png",
                       title: "ZoneAware",
@@ -182,6 +196,7 @@ class _HomepageState extends State<Homepage> {
                         );
                       },
                     ),
+
                     MenuCard(
                       imagePath: "Image/clock.png",
                       title: "Aduan Ku",
@@ -210,8 +225,10 @@ class _HomepageState extends State<Homepage> {
                   children: [
                     const Text(
                       "Aduan Terbaru",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     InkWell(
                       onTap: () {
@@ -272,13 +289,15 @@ class _HomepageState extends State<Homepage> {
                     child: Column(
                       children: tampilAduan.map((aduan) {
                         final List media = aduan['media'] ?? [];
-
-                        String imagePath = "Image/bukit1.jpg";
+                        String imagePath = "Image/default1.jpg";
 
                         if (media.isNotEmpty) {
-                          final url = buildMediaUrl(media.first['path']);
+                          final url = media.first['path'];
                           if (_isImage(url)) {
-                            imagePath = url;
+                            imagePath = url.replaceFirst(
+                              '/storage/uploads',
+                              '/storage/app/public/uploads',
+                            );
                           }
                         }
 
@@ -328,10 +347,8 @@ class _HomepageState extends State<Homepage> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const TambahAduanPage()),
-            ).then((_) {
-              setState(() => _loadAduan());
-            });
-          }else if(index == 2){
+            ).then((_) => _loadAduan());
+          } else if (index == 2) {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ProfilePage()),

@@ -49,18 +49,28 @@ void _loadData() async {
   });
 }
   /// ================= IMAGE URL FIX =================
-  String buildImageUrl(String path) {
-    if (path.startsWith('http')) {
-      if (!path.contains(':8000')) {
-        return path.replaceFirst(
-          'http://192.168.1.46',
-          'http://192.168.1.46:8000',
-        );
-      }
-      return path;
+ /// ================= IMAGE URL FIX =================
+String buildImageUrl(String path) {
+  // Kalau sudah full URL
+  if (path.startsWith('http')) {
+    // Ubah /storage/uploads -> /storage/app/public/uploads
+    if (path.contains('/storage/uploads')) {
+      return path.replaceFirst(
+        '/storage/uploads',
+        '/storage/app/public/uploads',
+      );
     }
-    return "http://192.168.1.46:8000$path";
+    return path;
   }
+
+  // Kalau cuma path (tanpa domain)
+  return 'https://hetra.my.id' +
+      path.replaceFirst(
+        '/storage/uploads',
+        '/storage/app/public/uploads',
+      );
+}
+
 
   @override
   Widget build(BuildContext context) {

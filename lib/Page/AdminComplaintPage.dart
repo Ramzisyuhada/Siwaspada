@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:siwaspada/Page/DetailAduanPage.dart';
 import 'package:siwaspada/Service/AdminComplaintService.dart';
 
 class AdminListAduanPage extends StatefulWidget {
@@ -10,10 +11,10 @@ class AdminListAduanPage extends StatefulWidget {
   });
 
   @override
-  State<AdminListAduanPage> createState() => _AdminListAduanPageState();
+  State<AdminListAduanPage> createState() => _ListAduanPageState();
 }
 
-class _AdminListAduanPageState extends State<AdminListAduanPage> {
+class _ListAduanPageState extends State<AdminListAduanPage> {
   late Future<List<dynamic>> futureAduan;
 
   @override
@@ -23,10 +24,10 @@ class _AdminListAduanPageState extends State<AdminListAduanPage> {
   }
 
   void _loadData() {
-    futureAduan = AdminComplaintService.getComplaintsByTour(widget.idTour);
+    futureAduan =
+        AdminComplaintService.getComplaintsByTour(widget.idTour);
   }
 
-  /// ================= STATUS COLOR =================
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -40,7 +41,6 @@ class _AdminListAduanPageState extends State<AdminListAduanPage> {
     }
   }
 
-  /// ================= SAFE STATUS =================
   String _safeStatus(dynamic status) {
     if (status == null || status.toString().isEmpty) {
       return "pending";
@@ -68,18 +68,22 @@ class _AdminListAduanPageState extends State<AdminListAduanPage> {
         child: FutureBuilder<List<dynamic>>(
           future: futureAduan,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+            if (snapshot.connectionState ==
+                ConnectionState.waiting) {
+              return const Center(
+                  child: CircularProgressIndicator());
             }
 
             if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
+              return Center(
+                  child: Text("Error: ${snapshot.error}"));
             }
 
             final list = snapshot.data ?? [];
 
             if (list.isEmpty) {
-              return const Center(child: Text("Belum ada aduan"));
+              return const Center(
+                  child: Text("Belum ada aduan"));
             }
 
             return ListView.builder(
@@ -89,98 +93,138 @@ class _AdminListAduanPageState extends State<AdminListAduanPage> {
                 final aduan = list[index];
                 final status = _safeStatus(aduan['status']);
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        /// ================= USER + DATE =================
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              aduan['user']['username'] ?? "-",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              aduan['complaint_date']
-                                      ?.toString()
-                                      .substring(0, 10) ??
+                return InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => DetailAduanPage(
+                          title:
+                              aduan['user']['username'] ??
                                   "-",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
+                          date: aduan['complaint_date']
+                                  ?.toString()
+                                  .substring(0, 10) ??
+                              "-",
+                          status:
+                              aduan['status'] ?? "pending",
+                          description:
+                              aduan['complaint'] ?? "-",
+                          media: aduan['media'] ?? [],
+                        ),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    margin:
+                        const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(14),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment
+                                    .spaceBetween,
+                            children: [
+                              Text(
+                                aduan['user']['username'] ??
+                                    "-",
+                                style: const TextStyle(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        /// ================= COMPLAINT =================
-                        Text(
-                          aduan['complaint'] ?? "-",
-                          style: const TextStyle(fontSize: 14),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        /// ================= STATUS ROW =================
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            /// STATUS CHIP
-                            Chip(
-                              label: Text(
-                                status,
-                                style: TextStyle(
-                                  color: _statusColor(status),
-                                  fontWeight: FontWeight.bold,
+                              Text(
+                                aduan['complaint_date']
+                                        ?.toString()
+                                        .substring(
+                                            0, 10) ??
+                                    "-",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
                                 ),
                               ),
-                              backgroundColor:
-                                  _statusColor(status).withOpacity(0.15),
-                            ),
-
-                            /// DROPDOWN UPDATE STATUS
-                            DropdownButton<String>(
-                              value: status,
-                              underline: const SizedBox(),
-                              items: const [
-                                DropdownMenuItem(
-                                  value: "pending",
-                                  child: Text("Pending"),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            aduan['complaint'] ?? "-",
+                            maxLines: 2,
+                            overflow:
+                                TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment
+                                    .spaceBetween,
+                            children: [
+                              Chip(
+                                label: Text(
+                                  status,
+                                  style: TextStyle(
+                                    color:
+                                        _statusColor(
+                                            status),
+                                    fontWeight:
+                                        FontWeight.bold,
+                                  ),
                                 ),
-                                DropdownMenuItem(
-                                  value: "proses",
-                                  child: Text("Proses"),
-                                ),
-                                DropdownMenuItem(
-                                  value: "selesai",
-                                  child: Text("Selesai"),
-                                ),
-                              ],
-                              onChanged: (value) async {
-                                if (value == null) return;
+                                backgroundColor:
+                                    _statusColor(status)
+                                        .withOpacity(
+                                            0.15),
+                              ),
+                              DropdownButton<String>(
+                                value: status,
+                                underline:
+                                    const SizedBox(),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: "pending",
+                                    child:
+                                        Text("Pending"),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: "proses",
+                                    child:
+                                        Text("Proses"),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: "selesai",
+                                    child:
+                                        Text("Selesai"),
+                                  ),
+                                ],
+                                onChanged:
+                                    (value) async {
+                                  if (value ==
+                                      null) return;
 
-                                await AdminComplaintService.updateStatus(
-                                 idComplaint:  aduan['id_complaint'],
-                                 status:  value,
-                                );
+                                  await AdminComplaintService
+                                      .updateStatus(
+                                    idComplaint: aduan[
+                                        'id_complaint'],
+                                    status: value,
+                                  );
 
-                                setState(() => _loadData());
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
+                                  setState(() =>
+                                      _loadData());
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

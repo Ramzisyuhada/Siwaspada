@@ -17,10 +17,11 @@ class _ProfilePageState extends State<ProfilePage> {
   bool isLoading = true;
 
   final Map<int, String> destinasiMap = {
-    1: "Kute",
-    2: "Pantai",
-    3: "Mandalika",
+    1: "Pantai Kute",
+    2: "Sirkuit Mandalika",
+    3: "Bukit Merese",
   };
+
 
   @override
   void initState() {

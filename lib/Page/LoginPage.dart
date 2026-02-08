@@ -23,9 +23,9 @@ class _LoginPageState extends State<LoginPage> {
 
   /// ================= MAP DESTINASI -> ID TOUR =================
   final Map<String, int> destinasiMap = {
-    "Kute": 1,
-    "Pantai": 2,
-    "Mandalika": 3,
+    "Pantai Kute": 1,
+    "Sirkuit Mandalika": 2,
+    "Bukit Merese": 3,
   };
 
   bool isLoading = false;
